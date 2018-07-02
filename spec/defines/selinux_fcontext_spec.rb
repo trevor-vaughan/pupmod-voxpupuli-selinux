@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::fcontext' do
+describe 'vox_selinux::fcontext' do
   let(:title) { 'myfile' }
 
   on_supported_os.each do |os, facts|
@@ -17,8 +17,8 @@ describe 'selinux::fcontext' do
           }
         end
 
-        it { is_expected.to contain_selinux__fcontext('myfile').that_requires('Anchor[selinux::module post]') }
-        it { is_expected.to contain_selinux__fcontext('myfile').that_comes_before('Anchor[selinux::end]') }
+        it { is_expected.to contain_vox_selinux__fcontext('myfile').that_requires('Anchor[vox_selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__fcontext('myfile').that_comes_before('Anchor[vox_selinux::end]') }
       end
       context 'removal ordering' do
         let(:params) do
@@ -29,9 +29,9 @@ describe 'selinux::fcontext' do
           }
         end
 
-        it { is_expected.to contain_selinux__fcontext('myfile').that_requires('Anchor[selinux::start]') }
-        it { is_expected.to contain_selinux__fcontext('myfile').with(ensure: 'absent') }
-        it { is_expected.to contain_selinux__fcontext('myfile').that_comes_before('Anchor[selinux::module pre]') }
+        it { is_expected.to contain_vox_selinux__fcontext('myfile').that_requires('Anchor[vox_selinux::start]') }
+        it { is_expected.to contain_vox_selinux__fcontext('myfile').with(ensure: 'absent') }
+        it { is_expected.to contain_vox_selinux__fcontext('myfile').that_comes_before('Anchor[vox_selinux::module pre]') }
       end
 
       context 'invalid filetype' do

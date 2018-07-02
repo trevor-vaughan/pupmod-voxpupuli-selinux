@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::permissive' do
+describe 'vox_selinux::permissive' do
   let(:title) { 'mycontextp' }
 
   on_supported_os.each do |os, facts|
@@ -17,8 +17,8 @@ describe 'selinux::permissive' do
         end
 
         it { is_expected.to contain_selinux_permissive('oddjob_mkhomedir_t').with(ensure: 'present') }
-        it { is_expected.to contain_selinux__permissive('mycontextp').that_requires('Anchor[selinux::module post]') }
-        it { is_expected.to contain_selinux__permissive('mycontextp').that_comes_before('Anchor[selinux::end]') }
+        it { is_expected.to contain_vox_selinux__permissive('mycontextp').that_requires('Anchor[vox_selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__permissive('mycontextp').that_comes_before('Anchor[vox_selinux::end]') }
       end
 
       context 'ensure selinux_permissive oddjob_mkhomedir_t is absent' do
@@ -30,8 +30,8 @@ describe 'selinux::permissive' do
         end
 
         it { is_expected.to contain_selinux_permissive('oddjob_mkhomedir_t').with(ensure: 'absent') }
-        it { is_expected.to contain_selinux__permissive('mycontextp').that_requires('Anchor[selinux::start]') }
-        it { is_expected.to contain_selinux__permissive('mycontextp').that_comes_before('Anchor[selinux::module pre]') }
+        it { is_expected.to contain_vox_selinux__permissive('mycontextp').that_requires('Anchor[vox_selinux::start]') }
+        it { is_expected.to contain_vox_selinux__permissive('mycontextp').that_comes_before('Anchor[vox_selinux::module pre]') }
       end
 
       context 'selinux_permissive oddjob_mkhomedir_t with title only' do
@@ -40,8 +40,8 @@ describe 'selinux::permissive' do
         end
 
         it { is_expected.to contain_selinux_permissive('oddjob_mkhomedir_t').with(ensure: 'present') }
-        it { is_expected.to contain_selinux__permissive('oddjob_mkhomedir_t').that_requires('Anchor[selinux::module post]') }
-        it { is_expected.to contain_selinux__permissive('oddjob_mkhomedir_t').that_comes_before('Anchor[selinux::end]') }
+        it { is_expected.to contain_vox_selinux__permissive('oddjob_mkhomedir_t').that_requires('Anchor[vox_selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__permissive('oddjob_mkhomedir_t').that_comes_before('Anchor[vox_selinux::end]') }
       end
     end
   end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::port' do
+describe 'vox_selinux::port' do
   let(:title) { 'myapp' }
 
   on_supported_os.each do |os, facts|
@@ -18,8 +18,8 @@ describe 'selinux::port' do
           }
         end
 
-        it { is_expected.to contain_selinux__port('myapp').that_requires('Anchor[selinux::module post]') }
-        it { is_expected.to contain_selinux__port('myapp').that_comes_before('Anchor[selinux::end]') }
+        it { is_expected.to contain_vox_selinux__port('myapp').that_requires('Anchor[vox_selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__port('myapp').that_comes_before('Anchor[vox_selinux::end]') }
       end
 
       %w[tcp udp].each do |protocol|

@@ -1,9 +1,9 @@
-# selinux::exec_restorecon
+# vox_selinux::exec_restorecon
 #
 # A convenience wrapper around a restorecon exec
 #
 # Will execute after all other SELinux changes have been applied, but before
-# Anchor['selinux::end']
+# Anchor['vox_selinux::end']
 #
 # @param path The path to run restorecon on. Defaults to resource title.
 # @param recurse Whether restorecon should recurse. Defaults to true
@@ -12,7 +12,7 @@
 # @param unless see the Exec resource
 # @param onlyif see the Exec resource
 #
-define selinux::exec_restorecon(
+define vox_selinux::exec_restorecon(
   Stdlib::Absolutepath $path        = $title,
   Boolean              $refreshonly = true,
   Boolean              $recurse     = true,
@@ -21,7 +21,7 @@ define selinux::exec_restorecon(
   Optional[String]     $onlyif      = undef,
 ) {
 
-  include ::selinux
+  include ::vox_selinux
 
   $opt_recurse = $recurse ? {
     true  => ' -R',
@@ -35,14 +35,14 @@ define selinux::exec_restorecon(
 
   $command = "restorecon${opt_force}${opt_recurse}"
 
-  exec {"selinux::exec_restorecon ${path}":
+  exec {"vox_selinux::exec_restorecon ${path}":
     path        => '/sbin:/usr/sbin',
     command     => sprintf('%s %s', $command, shellquote($path)),
     refreshonly => $refreshonly,
     unless      => $unless,
     onlyif      => $onlyif,
-    before      => Anchor['selinux::end'],
+    before      => Anchor['vox_selinux::end'],
   }
 
-  Anchor['selinux::module post']  -> Exec["selinux::exec_restorecon ${path}"]
+  Anchor['vox_selinux::module post']  -> Exec["vox_selinux::exec_restorecon ${path}"]
 }

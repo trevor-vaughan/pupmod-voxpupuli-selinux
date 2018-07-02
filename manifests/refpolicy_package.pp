@@ -1,4 +1,4 @@
-# selinux::package
+# vox_selinux::package
 #
 # THIS IS A PRIVATE CLASS
 # =======================
@@ -8,10 +8,10 @@
 # @param manage_package See main class
 # @param package_name See main class
 #
-class selinux::refpolicy_package (
-  $manage_package = $::selinux::manage_package,
-  $package_name   = $::selinux::refpolicy_package_name,
-) inherits ::selinux {
+class vox_selinux::refpolicy_package (
+  $manage_package = $::vox_selinux::manage_package,
+  $package_name   = $::vox_selinux::refpolicy_package_name,
+) inherits ::vox_selinux {
   if $caller_module_name != $module_name {
     fail("Use of private class ${name} by ${caller_module_name}")
   }

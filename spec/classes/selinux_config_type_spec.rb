@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux' do
+describe 'vox_selinux' do
   on_supported_os.each do |os, facts|
     context "on #{os}" do
       let(:facts) do
@@ -11,7 +11,7 @@ describe 'selinux' do
         context 'invalid type' do
           let(:params) { { type: 'invalid' } }
 
-          it { expect { is_expected.to create_class('selinux') }.to raise_error(Puppet::Error, %r{Enum}) }
+          it { expect { is_expected.to create_class('vox_selinux') }.to raise_error(Puppet::Error, %r{Enum}) }
         end
         context 'undef type' do
           it { is_expected.to have_file_resource_count(5) }
