@@ -1,11 +1,11 @@
-# Class: selinux::config
+# Class: vox_selinux::config
 #
 # THIS IS A PRIVATE CLASS
 # =======================
 #
 # This class is designed to configure the system to use SELinux on the system.
 #
-# It is included in the main class ::selinux
+# It is included in the main class ::vox_selinux
 #
 #
 #
@@ -27,12 +27,12 @@
 # @param package_name See main class
 # @param module_build_root See main class
 #
-class selinux::config (
-  $mode                                   = $::selinux::mode,
-  $type                                   = $::selinux::type,
-  $manage_package                         = $::selinux::manage_package,
-  $package_name                           = $::selinux::package_name,
-  Stdlib::Absolutepath $module_build_root = $::selinux::module_build_root
+class vox_selinux::config (
+  $mode                                   = $::vox_selinux::mode,
+  $type                                   = $::vox_selinux::type,
+  $manage_package                         = $::vox_selinux::manage_package,
+  $package_name                           = $::vox_selinux::package_name,
+  Stdlib::Absolutepath $module_build_root = $::vox_selinux::module_build_root
 ) {
 
   if $caller_module_name != $module_name {
@@ -40,7 +40,7 @@ class selinux::config (
   }
 
   if ($mode == 'enforcing' and !$::selinux) {
-    notice('SELinux is disabled. Forcing configuration to permissive to avoid problems. To disable this warning, explicitly set selinux::mode to permissive or disabled.')
+    notice('SELinux is disabled. Forcing configuration to permissive to avoid problems. To disable this warning, explicitly set vox_selinux::mode to permissive or disabled.')
     $_real_mode = 'permissive'
   } else {
     $_real_mode = $mode

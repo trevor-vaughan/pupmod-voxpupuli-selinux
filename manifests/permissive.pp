@@ -1,4 +1,4 @@
-# selinux::permissive
+# vox_selinux::permissive
 #
 # This define will set an SELinux type to permissive
 #
@@ -6,24 +6,24 @@
 # @param seltype A particular selinux type to make permissive, like "oddjob_mkhomedir_t"
 #
 # @example Mark oddjob_mkhomedir_t permissive
-#   selinux::permissive { 'oddjob_mkhomedir_t':
+#   vox_selinux::permissive { 'oddjob_mkhomedir_t':
 #     ensure => 'present'
 #   }
 #
-define selinux::permissive (
+define vox_selinux::permissive (
   String $seltype = $title,
   Enum['present', 'absent'] $ensure = 'present',
 ) {
 
-  include ::selinux
+  include ::vox_selinux
   if $ensure == 'present' {
-    Anchor['selinux::module post']
-    -> Selinux::Permissive[$title]
-    -> Anchor['selinux::end']
+    Anchor['vox_selinux::module post']
+    -> Vox_selinux::Permissive[$title]
+    -> Anchor['vox_selinux::end']
   } else {
-    Anchor['selinux::start']
-    -> Selinux::Permissive[$title]
-    -> Anchor['selinux::module pre']
+    Anchor['vox_selinux::start']
+    -> Vox_selinux::Permissive[$title]
+    -> Anchor['vox_selinux::module pre']
   }
 
   selinux_permissive {$seltype:

@@ -1,11 +1,10 @@
 # SELinux module for Puppet
 
-[![Build Status](https://travis-ci.org/voxpupuli/puppet-selinux.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-selinux)
-[![Code Coverage](https://coveralls.io/repos/github/voxpupuli/puppet-selinux/badge.svg?branch=master)](https://coveralls.io/github/voxpupuli/puppet-selinux)
-[![Puppet Forge](https://img.shields.io/puppetforge/v/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
-[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
-[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
-[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
+[![Build Status](https://travis-ci.org/simp/pupmod-voxpupuli-selinux.png?branch=master)](https://travis-ci.org/simp/pupmod-voxpupuli-selinux)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
+[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
+[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
+[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
 
 #### Table of Contents
 
@@ -21,6 +20,31 @@
 
 This class manages SELinux on RHEL based systems.
 
+---
+
+> This module has been forked from
+> (voxpupuli/selinux)[https://github.com/voxpupuli/puppet-selinux] so that it
+> could be re-namespaced as `vox_selinux` for the
+> (SIMP)[https://simp-project.com] framework.
+>
+> Migration to the upstream module will happen in the future after sufficient
+> time has been provided for users to migrate away from the legacy SIMP
+> provided module.
+>
+> Any changes made here should be sent in as PRs to the upstream module and
+> this should not deviate from the upstream release outside of the namespace if
+> at all possible.
+>
+> Per the Apache 2.0 license requirements, the following changes have been made:
+> * Renamed the module from `puppet/selinux` to `simp/vox_selinux`
+> * Changed the namespace for all components to `vox_selinux`
+> * Updated the tests to reflect the changes
+> * Disabled reporting to the `voxpupuli` channels on test failures
+> * Updated .travis.yml for deployment and SIMP-style testing stages
+> * Updated the README.md to note the changes
+
+---
+
 ## Requirements
 
 * Puppet 4 or later
@@ -29,13 +53,6 @@ This class manages SELinux on RHEL based systems.
 
 This module will configure SELinux and/or deploy SELinux based modules to
 running system.
-
-## Get in touch
-
-* IRC: [#voxpupuli on irc.freenode.net](irc://irc.freenode.net/voxpupuli)
-  ([Freenode WebChat](http://webchat.freenode.net/?channels=%23voxpupuli))
-* Mailinglist: <voxpupuli@groups.io>
-  ([groups.io Webinterface](https://groups.io/g/voxpupuli/topics))
 
 ## Upgrading from puppet-selinux 0.8.x
 
@@ -63,17 +80,17 @@ running system.
   will downgrade to permissive mode instead to avoid transitioning directly from
   disabled to enforcing state after a reboot and potentially breaking the system.
   The user will receive a warning when this happens,
-* If you add filecontexts with `semanage fcontext` (what `selinux::fcontext`
+* If you add filecontexts with `semanage fcontext` (what `vox_selinux::fcontext`
   does) the order is important. If you add /my/folder before /my/folder/subfolder
   only /my/folder will match (limitation of SELinux). There is no such limitation
   to file-contexts defined in SELinux modules. (GH-121)
-* While SELinux is disabled the defined types `selinux::boolean`,
-  `selinux::fcontext`, `selinux::port` will produce puppet agent runtime errors
+* While SELinux is disabled the defined types `vox_selinux::boolean`,
+  `vox_selinux::fcontext`, `vox_selinux::port` will produce puppet agent runtime errors
   because the used tools fail.
 * If you try to remove a built-in permissive type, the operation will appear to succeed
   but will actually have no effect, making your puppet runs non-idempotent.
-* The `selinux_port` provider may misbehave if the title does not correspond to
-  the format it expects. Users should use the `selinux::port` define instead except
+* The `vox_selinux_port` provider may misbehave if the title does not correspond to
+  the format it expects. Users should use the `vox_selinux::port` define instead except
   when purging resources
 * Defining port ranges that overlap with existing ranges is currently not detected, and will
   cause semanage to error when the resource is applied.
@@ -81,7 +98,7 @@ running system.
 ## Usage
 
 Generated puppet strings documentation with examples is available from
-https://voxpupuli.org/puppet-selinux/
+https://github.com/simp/pupmod-voxpupuli-selinux
 
 It's also included in the docs/ folder as simple html pages.
 
@@ -90,7 +107,7 @@ It's also included in the docs/ folder as simple html pages.
 ### Basic usage
 
 ```puppet
-include selinux
+include vox_selinux
 ```
 
 This will include the module and allow you to use the provided defined types,
@@ -99,7 +116,7 @@ but will not modify existing SELinux settings on the system.
 ### More advanced usage
 
 ```puppet
-class { selinux:
+class { vox_selinux:
   mode => 'enforcing',
   type => 'targeted',
 }
@@ -114,7 +131,7 @@ to fully take effect. It will run in `permissive` mode until then.
 ### Deploy a custom module using the refpolicy framework
 
 ```puppet
-selinux::module { 'resnet-puppet':
+vox_selinux::module { 'resnet-puppet':
   ensure    => 'present',
   source_te => 'puppet:///modules/site_puppet/site-puppet.te',
   source_fc => 'puppet:///modules/site_puppet/site-puppet.fc',
@@ -126,7 +143,7 @@ selinux::module { 'resnet-puppet':
 ### Set a boolean value
 
 ```puppet
-selinux::boolean { 'puppetagent_manage_all_files': }
+vox_selinux::boolean { 'puppetagent_manage_all_files': }
 ```
 
 ## Defined Types

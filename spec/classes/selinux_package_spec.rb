@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux' do
+describe 'vox_selinux' do
   context 'package' do
     %w[6 7].each do |majrelease|
       context "On RedHat #{majrelease} based OSes" do

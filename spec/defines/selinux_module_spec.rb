@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::module' do
+describe 'vox_selinux::module' do
   let(:title) { 'mymodule' }
 
   on_supported_os.each do |os, facts|
@@ -22,8 +22,8 @@ describe 'selinux::module' do
           }
         end
 
-        it { is_expected.to contain_selinux__module('mymodule').that_requires('Anchor[selinux::module pre]') }
-        it { is_expected.to contain_selinux__module('mymodule').that_comes_before('Anchor[selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__module('mymodule').that_requires('Anchor[vox_selinux::module pre]') }
+        it { is_expected.to contain_vox_selinux__module('mymodule').that_comes_before('Anchor[vox_selinux::module post]') }
       end
 
       context 'present case with refpolicy builder and with te file only' do

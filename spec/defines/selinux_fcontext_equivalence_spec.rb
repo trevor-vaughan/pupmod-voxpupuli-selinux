@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::fcontext::equivalence' do
+describe 'vox_selinux::fcontext::equivalence' do
   let(:title) { '/opt/some/path' }
 
   on_supported_os.each do |os, facts|
@@ -16,8 +16,8 @@ describe 'selinux::fcontext::equivalence' do
           }
         end
 
-        it { is_expected.to contain_selinux__fcontext__equivalence('/opt/some/path').that_requires('Anchor[selinux::module post]') }
-        it { is_expected.to contain_selinux__fcontext__equivalence('/opt/some/path').that_comes_before('Anchor[selinux::end]') }
+        it { is_expected.to contain_vox_selinux__fcontext__equivalence('/opt/some/path').that_requires('Anchor[vox_selinux::module post]') }
+        it { is_expected.to contain_vox_selinux__fcontext__equivalence('/opt/some/path').that_comes_before('Anchor[vox_selinux::end]') }
         it { is_expected.to contain_selinux_fcontext_equivalence('/opt/some/path').with(target: '/opt/some/other/path') }
       end
       context 'ordering on ensure => absent' do
@@ -28,8 +28,8 @@ describe 'selinux::fcontext::equivalence' do
           }
         end
 
-        it { is_expected.to contain_selinux__fcontext__equivalence('/opt/some/path').that_requires('Anchor[selinux::start]') }
-        it { is_expected.to contain_selinux__fcontext__equivalence('/opt/some/path').that_comes_before('Anchor[selinux::module pre]') }
+        it { is_expected.to contain_vox_selinux__fcontext__equivalence('/opt/some/path').that_requires('Anchor[vox_selinux::start]') }
+        it { is_expected.to contain_vox_selinux__fcontext__equivalence('/opt/some/path').that_comes_before('Anchor[vox_selinux::module pre]') }
         it { is_expected.to contain_selinux_fcontext_equivalence('/opt/some/path').with(ensure: 'absent', target: '/opt/some/other/path') }
       end
     end

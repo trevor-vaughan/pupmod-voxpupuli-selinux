@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'selinux::boolean' do
+describe 'vox_selinux::boolean' do
   let(:title) { 'mybool' }
 
   on_supported_os.each do |os, facts|
@@ -9,8 +9,8 @@ describe 'selinux::boolean' do
         facts
       end
 
-      it { is_expected.to contain_selinux__boolean('mybool').that_requires('Anchor[selinux::module post]') }
-      it { is_expected.to contain_selinux__boolean('mybool').that_comes_before('Anchor[selinux::end]') }
+      it { is_expected.to contain_vox_selinux__boolean('mybool').that_requires('Anchor[vox_selinux::module post]') }
+      it { is_expected.to contain_vox_selinux__boolean('mybool').that_comes_before('Anchor[vox_selinux::end]') }
 
       ['on', true, 'present'].each do |value|
         context value do

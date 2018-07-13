@@ -1,4 +1,4 @@
-# Defined type: selinux::module
+# Defined type: vox_selinux::module
 #
 # This class will either install or uninstall a SELinux module from a running system.
 # This module allows an admin to keep .te files in text form in a repository, while
@@ -9,7 +9,7 @@
 # 
 # @example compile and load the apache module - does not require make or the policy
 #   devel package
-#   selinux::module{ 'apache':
+#   vox_selinux::module{ 'apache':
 #     ensure    => 'present',
 #     source_te => 'puppet:///modules/selinux/apache.te',
 #     builder   => 'simple'
@@ -17,7 +17,7 @@
 #
 # @example compile a module the refpolicy way. It will install the policy devel and
 #   dependent packages like make.
-#   selinux::module{ 'mymodule':
+#   vox_selinux::module{ 'mymodule':
 #     ensure    => 'present',
 #     source_te => 'puppet:///modules/profile/selinux/mymodule.te',
 #     source_fc => 'puppet:///modules/profile/selinux/mymodule.fc',
@@ -35,7 +35,7 @@
 #     }
 #     allow zabbix_t unreserved_port_t:tcp_socket name_connect;
 #     | END
-#   selinux::module{ 'zabbix_fix':
+#   vox_selinux::module{ 'zabbix_fix':
 #     ensure     => 'present',
 #     content_te => $content,
 #     builder    => 'simple'
@@ -50,7 +50,7 @@
 # @param content_if content of the SELinux .if file
 # @param builder either 'simple' or 'refpolicy'. The simple builder attempts to use checkmodule
 #   to build the module, whereas 'refpolicy' uses the refpolicy framework, but requires 'make'
-define selinux::module(
+define vox_selinux::module(
   Optional[String] $source_te = undef,
   Optional[String] $source_fc = undef,
   Optional[String] $source_if = undef,
@@ -60,28 +60,28 @@ define selinux::module(
   Enum['absent', 'present'] $ensure = 'present',
   Optional[Enum['simple', 'refpolicy']] $builder = undef,
 ) {
-  include ::selinux
+  include ::vox_selinux
 
   if $builder == 'refpolicy' {
-    require ::selinux::refpolicy_package
+    require ::vox_selinux::refpolicy_package
   }
 
   if ($builder == 'simple' and ($source_if != undef or $content_if != undef)) {
     fail("The simple builder does not support the 'source_if' parameter")
   }
 
-  $module_dir = $::selinux::config::module_build_dir
+  $module_dir = $::vox_selinux::config::module_build_dir
   $module_file = "${module_dir}/${title}"
 
-  $build_command = pick($builder, $::selinux::default_builder, 'none') ? {
-      'simple'    => shellquote("${::selinux::module_build_root}/bin/selinux_build_module_simple.sh", $title, $module_dir),
-      'refpolicy' => shellquote('make', '-f', $::selinux::refpolicy_makefile, "${title}.pp"),
+  $build_command = pick($builder, $::vox_selinux::default_builder, 'none') ? {
+      'simple'    => shellquote("${::vox_selinux::module_build_root}/bin/selinux_build_module_simple.sh", $title, $module_dir),
+      'refpolicy' => shellquote('make', '-f', $::vox_selinux::refpolicy_makefile, "${title}.pp"),
       'none'      => fail('No builder or default builder specified')
   }
 
-  Anchor['selinux::module pre']
-  -> Selinux::Module[$title]
-  -> Anchor['selinux::module post']
+  Anchor['vox_selinux::module pre']
+  -> Vox_selinux::Module[$title]
+  -> Anchor['vox_selinux::module post']
   $has_source = (pick($source_te, $source_fc, $source_if, $content_te, $content_fc, $content_if, false) != false)
 
   if $has_source and $ensure == 'present' {

@@ -1,10 +1,10 @@
-# selinux::port
+# vox_selinux::port
 #
 # This method will manage a local network port context setting, and will
 # persist it across reboots.
 #
 # @example Add port-context syslogd_port_t to port 8514/tcp
-#   selinux::port { 'allow-syslog-relp':
+#   vox_selinux::port { 'allow-syslog-relp':
 #     ensure   => 'present',
 #     seltype  => 'syslogd_port_t',
 #     protocol => 'tcp',
@@ -17,7 +17,7 @@
 # @param port A network port number, like 8514,
 # @param port_range A port-range tuple, eg. [9090, 9095].
 #
-define selinux::port (
+define vox_selinux::port (
   String                             $seltype,
   Enum['tcp', 'udp']                 $protocol,
   Optional[Integer[1,65535]]         $port = undef,
@@ -25,16 +25,16 @@ define selinux::port (
   Enum['present', 'absent']          $ensure = 'present',
 ) {
 
-  include ::selinux
+  include ::vox_selinux
 
   if $ensure == 'present' {
-    Anchor['selinux::module post']
-    -> Selinux::Port[$title]
-    -> Anchor['selinux::end']
+    Anchor['vox_selinux::module post']
+    -> Vox_selinux::Port[$title]
+    -> Anchor['vox_selinux::end']
   } elsif $ensure == 'absent' {
-    Class['selinux::config']
-    -> Selinux::Port[$title]
-    -> Anchor['selinux::module pre']
+    Class['vox_selinux::config']
+    -> Vox_selinux::Port[$title]
+    -> Anchor['vox_selinux::module pre']
   } else {
     fail('Unexpected $ensure value')
   }

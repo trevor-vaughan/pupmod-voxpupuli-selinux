@@ -1,11 +1,11 @@
-# selinux::params
+# vox_selinux::params
 #
 # THIS IS A PRIVATE CLASS
 # =======================
 #
 # This class provides default parameters for the selinux class
 #
-class selinux::params {
+class vox_selinux::params {
   $refpolicy_makefile = '/usr/share/selinux/devel/Makefile'
   $mode           = undef
   $type           = undef

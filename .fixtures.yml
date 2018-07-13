@@ -3,5 +3,5 @@ fixtures:
     concat: https://github.com/puppetlabs/puppetlabs-concat.git
     stdlib: https://github.com/puppetlabs/puppetlabs-stdlib.git
   symlinks:
-    selinux: "#{source_dir}"
+    vox_selinux: "#{source_dir}"
 
