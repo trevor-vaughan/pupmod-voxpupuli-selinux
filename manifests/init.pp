@@ -1,4 +1,4 @@
-# Class: vox_selinux
+# Class: selinux
 #
 # This class manages SELinux on RHEL based systems.
 #
