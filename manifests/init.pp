@@ -1,9 +1,9 @@
-# Class: selinux
+# Class: vox_selinux
 #
 # This class manages SELinux on RHEL based systems.
 #
 # @example Enable enforcing mode with targeted policy
-#   class { 'selinux':
+#   class { 'vox_selinux':
 #     mode => 'enforcing',
 #     type => 'targeted',
 #   }
