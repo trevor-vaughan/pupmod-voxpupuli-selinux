@@ -5,7 +5,7 @@
 #
 # This class is designed to configure the system to use SELinux on the system.
 #
-# It is included in the main class ::selinux
+# It is included in the main class ::vox_selinux
 #
 #
 #
