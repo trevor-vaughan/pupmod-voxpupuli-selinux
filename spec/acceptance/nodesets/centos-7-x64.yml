@@ -11,5 +11,6 @@ HOSTS:
     hypervisor: vagrant
 CONFIG:
   type: aio
+  puppet_collection: puppet5
 ...
 # vim: syntax=yaml

@@ -1,7 +1,6 @@
-# vox_selinux::fcontext
-#
-# This define can be used to manage custom SELinux fcontexts. For fcontext 
-# equivalences, see vox_selinux::fcontext::equivalence
+# Manage custom SELinux fcontexts
+
+# For fcontext equivalences, see vox_selinux::fcontext::equivalence
 #
 # @example Add a file-context for mysql log files at non standard location
 #   vox_selinux::fcontext{'set-mysql-log-context':
@@ -9,16 +8,18 @@
 #     pathspec => "/u01/log/mysql(/.*)?",
 #   }
 #
-# @example Add a file-context only for directory types 
+# @example Add a file-context only for directory types
 #   vox_selinux::fcontext{'/u/users/[^/]*':
 #     filetype => 'd',
 #     seltype  => 'user_home_dir_t' ,
 #   }
 #
+# @see vox_selinux::fcontext::equivalence
+#
 # @param ensure   The desired state of the resource. Default: 'present'
 # @param seltype  String A particular SELinux type, like "mysqld_log_t"
 # @param seluser  String A particular SELinux user, like "sysadm_u"
-# @param pathspec String An semanage fcontext-formatted path specification, 
+# @param pathspec String An semanage fcontext-formatted path specification,
 #                        like "/var/log/mysql(/.*)?". Defaults to title
 # @param filetype File type the context applies to (i.e. regular file, directory, block device, all files, etc.)
 #   - Types:
@@ -38,7 +39,7 @@ define vox_selinux::fcontext(
   Optional[String] $filetype        = 'a',
 ) {
 
-  include ::vox_selinux
+  include vox_selinux
   if $ensure == 'present' {
   Anchor['vox_selinux::module post']
   -> Vox_selinux::Fcontext[$title]

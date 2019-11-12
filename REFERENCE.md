@@ -5,21 +5,27 @@
 
 **Classes**
 
-* [`selinux`](#selinux): Class: selinux  This class manages SELinux on RHEL based systems.
-* [`selinux::config`](#selinuxconfig): Class: selinux::config  THIS IS A PRIVATE CLASS =======================  This class is designed to configure the system to use SELinux on the
-* [`selinux::package`](#selinuxpackage): selinux::package  THIS IS A PRIVATE CLASS =======================  This module manages additional packages required to support some of the fu
-* [`selinux::params`](#selinuxparams): selinux::params  THIS IS A PRIVATE CLASS =======================  This class provides default parameters for the selinux class
-* [`selinux::refpolicy_package`](#selinuxrefpolicy_package): selinux::package  THIS IS A PRIVATE CLASS =======================  This module manages additional packages required to support some of the fu
+_Public Classes_
+
+* [`selinux`](#selinux): Manage SELinux on RHEL based systems.
+
+_Private Classes_
+
+* `selinux::build`: Configure the system for module building
+* `selinux::config`: Configure the system to use SELinux on the system.  It is included in the main class ::selinux
+* `selinux::package`: Manages additional packages required to support some of the functions.
+* `selinux::params`: This class provides default parameters for the selinux class
+* `selinux::refpolicy_package`: Manages additional packages required to support some of the functions.
 
 **Defined types**
 
-* [`selinux::boolean`](#selinuxboolean): selinux::boolean  This class will set the state of an SELinux boolean.
-* [`selinux::exec_restorecon`](#selinuxexec_restorecon): selinux::exec_restorecon  A convenience wrapper around a restorecon exec  Will execute after all other SELinux changes have been applied, but
-* [`selinux::fcontext`](#selinuxfcontext): selinux::fcontext  This define can be used to manage custom SELinux fcontexts. For fcontext equivalences, see selinux::fcontext::equivalence
-* [`selinux::fcontext::equivalence`](#selinuxfcontextequivalence): selinux::fcontext::equivalence  This define can be used to manage SELinux fcontext equivalences
-* [`selinux::module`](#selinuxmodule): Defined type: selinux::module  This class will either install or uninstall a SELinux module from a running system. This module allows an admi
-* [`selinux::permissive`](#selinuxpermissive): selinux::permissive  This define will set an SELinux type to permissive
-* [`selinux::port`](#selinuxport): selinux::port  This method will manage a local network port context setting, and will persist it across reboots.
+* [`selinux::boolean`](#selinuxboolean): Manage the state of an SELinux boolean.
+* [`selinux::exec_restorecon`](#selinuxexec_restorecon): A convenience wrapper around a restorecon exec
+* [`selinux::fcontext`](#selinuxfcontext): For fcontext equivalences, see selinux::fcontext::equivalence
+* [`selinux::fcontext::equivalence`](#selinuxfcontextequivalence): Manage SELinux fcontext equivalences
+* [`selinux::module`](#selinuxmodule): Manage a SELinux module on a running system
+* [`selinux::permissive`](#selinuxpermissive): Set SELinux type to permissive
+* [`selinux::port`](#selinuxport): Manage a SELinux local network port context setting
 
 **Resource types**
 
@@ -32,9 +38,7 @@
 
 ### selinux
 
-Class: selinux
-
-This class manages SELinux on RHEL based systems.
+Manage SELinux on RHEL based systems.
 
 #### Examples
 
@@ -56,39 +60,32 @@ The following parameters are available in the `selinux` class.
 Data type: `Optional[Enum['enforcing', 'permissive', 'disabled']]`
 
 sets the operating state for SELinux.
-Default value: undef
-Allowed values: (enforcing|permissive|disabled|undef)
 
-Default value: $::selinux::params::mode
+Default value: `undef`
 
 ##### `type`
 
 Data type: `Optional[Enum['targeted', 'minimum', 'mls']]`
 
 sets the selinux type
-Default value: undef
-Allowed values: (targeted|minimum|mls|undef)
 
-Default value: $::selinux::params::type
+Default value: `undef`
 
 ##### `refpolicy_makefile`
 
 Data type: `Stdlib::Absolutepath`
 
 the path to the system's SELinux makefile for the refpolicy framework
-Default value: /usr/share/selinux/devel/Makefile
-Allowed value: absolute path
 
-Default value: $::selinux::params::refpolicy_makefile
+Default value: '/usr/share/selinux/devel/Makefile'
 
 ##### `manage_package`
 
 Data type: `Boolean`
 
 manage the package for selinux tools and refpolicy
-Default value: true
 
-Default value: $::selinux::params::manage_package
+Default value: `true`
 
 ##### `package_name`
 
@@ -107,7 +104,7 @@ sets the name for the refpolicy development package, required for the
 refpolicy module builder
 Default value: OS dependent (see params.pp)
 
-Default value: $::selinux::params::refpolicy_package_name
+Default value: 'selinux-policy-devel'
 
 ##### `module_build_root`
 
@@ -122,7 +119,6 @@ Default value: $::selinux::params::module_build_root
 Data type: `Enum['refpolicy', 'simple']`
 
 which builder to use by default with selinux::module
-Default value: simple
 
 Default value: 'simple'
 
@@ -174,149 +170,11 @@ Hash of selinux::exec_restorecon resource parameters
 
 Default value: `undef`
 
-### selinux::config
-
-Class: selinux::config
-
-THIS IS A PRIVATE CLASS
-=======================
-
-This class is designed to configure the system to use SELinux on the system.
-
-It is included in the main class ::selinux
-
-
-
-Config for module building
---------------------------
-
-The module building requires the following file structure:
-
-```
-$module_build_root/
-  bin/ # for simple module build script
-  modules/ # module source files and compiled policies
-  modules/tmp # repolicy tempfiles (created by scripts)
-```
-
-#### Parameters
-
-The following parameters are available in the `selinux::config` class.
-
-##### `mode`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::mode
-
-##### `type`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::type
-
-##### `manage_package`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::manage_package
-
-##### `package_name`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::package_name
-
-##### `module_build_root`
-
-Data type: `Stdlib::Absolutepath`
-
-See main class
-
-Default value: $::selinux::module_build_root
-
-### selinux::package
-
-selinux::package
-
-THIS IS A PRIVATE CLASS
-=======================
-
-This module manages additional packages required to support some of the functions.
-
-#### Parameters
-
-The following parameters are available in the `selinux::package` class.
-
-##### `manage_package`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::manage_package
-
-##### `package_name`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::package_name
-
-### selinux::params
-
-selinux::params
-
-THIS IS A PRIVATE CLASS
-=======================
-
-This class provides default parameters for the selinux class
-
-### selinux::refpolicy_package
-
-selinux::package
-
-THIS IS A PRIVATE CLASS
-=======================
-
-This module manages additional packages required to support some of the functions.
-
-#### Parameters
-
-The following parameters are available in the `selinux::refpolicy_package` class.
-
-##### `manage_package`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::manage_package
-
-##### `package_name`
-
-Data type: `Any`
-
-See main class
-
-Default value: $::selinux::refpolicy_package_name
-
 ## Defined types
 
 ### selinux::boolean
 
-selinux::boolean
-
-This class will set the state of an SELinux boolean.
+Manage the state of an SELinux boolean.
 
 #### Examples
 
@@ -357,10 +215,6 @@ Set to false if you don't want it to survive a reboot.
 Default value: `true`
 
 ### selinux::exec_restorecon
-
-selinux::exec_restorecon
-
-A convenience wrapper around a restorecon exec
 
 Will execute after all other SELinux changes have been applied, but before
 Anchor['selinux::end']
@@ -419,10 +273,10 @@ Default value: `undef`
 
 ### selinux::fcontext
 
-selinux::fcontext
+For fcontext equivalences, see selinux::fcontext::equivalence
 
-This define can be used to manage custom SELinux fcontexts. For fcontext
-equivalences, see selinux::fcontext::equivalence
+* **See also**
+selinux::fcontext::equivalence
 
 #### Examples
 
@@ -500,9 +354,7 @@ Default value: 'a'
 
 ### selinux::fcontext::equivalence
 
-selinux::fcontext::equivalence
-
-This define can be used to manage SELinux fcontext equivalences
+Manage SELinux fcontext equivalences
 
 #### Examples
 
@@ -542,8 +394,6 @@ the desired state of the equivalence. Default: present
 Default value: 'present'
 
 ### selinux::module
-
-Defined type: selinux::module
 
 This class will either install or uninstall a SELinux module from a running system.
 This module allows an admin to keep .te files in text form in a repository, while
@@ -676,9 +526,7 @@ Default value: `undef`
 
 ### selinux::permissive
 
-selinux::permissive
-
-This define will set an SELinux type to permissive
+Set SELinux type to permissive
 
 #### Examples
 
@@ -711,8 +559,6 @@ A particular selinux type to make permissive, like "oddjob_mkhomedir_t"
 Default value: $title
 
 ### selinux::port
-
-selinux::port
 
 This method will manage a local network port context setting, and will
 persist it across reboots.

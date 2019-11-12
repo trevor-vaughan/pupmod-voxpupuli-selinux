@@ -1,6 +1,6 @@
 require 'spec_helper_acceptance'
 
-describe 'selinux class - enforcing to disabled' do
+describe 'vox_selinux class - enforcing to disabled' do
   before(:all) do
     shell('sed -i "s/SELINUX=.*/SELINUX=enforcing/" /etc/selinux/config')
     shell('setenforce Enforcing && test "$(getenforce)" = "Enforcing"')
@@ -8,7 +8,7 @@ describe 'selinux class - enforcing to disabled' do
 
   let(:pp) do
     <<-EOS
-      class { 'selinux': mode => 'disabled' }
+      class { 'vox_selinux': mode => 'disabled' }
     EOS
   end
 
@@ -23,7 +23,7 @@ describe 'selinux class - enforcing to disabled' do
       its(:content) { is_expected.to match(%r{^SELINUX=disabled$}) }
     end
 
-    # Testing for Permissive brecause only after a reboot it's disabled
+    # Testing for Permissive because only after a reboot it's disabled
     describe command('getenforce') do
       its(:stdout) { is_expected.to match(%r{^Permissive$}) }
     end

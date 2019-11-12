@@ -6,9 +6,25 @@ require 'spec_helper_acceptance'
 # module A.
 #
 describe 'selinux module refpolicy' do
+  before(:all) do
+    hosts.each do |host|
+      host.execute('getenforce') do |result|
+        mode = result.stdout.strip
+        if mode != 'Enforcing'
+          host.execute('sed -i "s/SELINUX=.*/SELINUX=enforcing/" /etc/selinux/config')
+          if mode == 'Disabled'
+            host.reboot
+          else
+            host.execute('setenforce Enforcing && test "$(getenforce)" = "Enforcing"')
+          end
+        end
+      end
+    end
+  end
+
   let(:pp) do
     <<-EOS
-      class { 'selinux': }
+      class { 'vox_selinux': }
 
       file {'/tmp/selinux_test_a.te':
         ensure  => 'file',
@@ -44,12 +60,12 @@ describe 'selinux module refpolicy' do
           puppet_test_a_domtrans(puppet_test_b_t)
           | EOF
       } ->
-      selinux::module { 'puppet_test_a':
+      vox_selinux::module { 'puppet_test_a':
         source_te   => 'file:///tmp/selinux_test_a.te',
         source_if   => 'file:///tmp/selinux_test_a.if',
         builder     => 'refpolicy',
       } ->
-      selinux::module { 'puppet_test_b':
+      vox_selinux::module { 'puppet_test_b':
         source_te   => 'file:///tmp/selinux_test_b.te',
         builder     => 'refpolicy',
       }

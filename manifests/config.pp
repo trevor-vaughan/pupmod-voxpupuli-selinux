@@ -1,43 +1,22 @@
-# Class: vox_selinux::config
+# Configure the system to use SELinux on the system.
 #
-# THIS IS A PRIVATE CLASS
-# =======================
-#
-# This class is designed to configure the system to use SELinux on the system.
-#
-# It is included in the main class ::vox_selinux
-#
-#
-#
-# Config for module building
-# --------------------------
-#
-# The module building requires the following file structure:
-#
-# ```
-# $module_build_root/
-#   bin/ # for simple module build script
-#   modules/ # module source files and compiled policies
-#   modules/tmp # repolicy tempfiles (created by scripts)
-# ```
+# It is included in the main class ::selinux
 #
 # @param mode See main class
 # @param type See main class
 # @param manage_package See main class
 # @param package_name See main class
-# @param module_build_root See main class
+#
+# @api private
 #
 class vox_selinux::config (
-  $mode                                   = $::vox_selinux::mode,
-  $type                                   = $::vox_selinux::type,
-  $manage_package                         = $::vox_selinux::manage_package,
-  $package_name                           = $::vox_selinux::package_name,
-  Stdlib::Absolutepath $module_build_root = $::vox_selinux::module_build_root
+  $mode           = $vox_selinux::mode,
+  $type           = $vox_selinux::type,
+  $manage_package = $vox_selinux::manage_package,
+  $package_name   = $vox_selinux::package_name,
 ) {
 
-  if $caller_module_name != $module_name {
-    fail("Use of private class ${name} by ${caller_module_name}")
-  }
+  assert_private()
 
   if ($mode == 'enforcing' and !$facts['selinux']) {
     notice('SELinux is disabled. Forcing configuration to permissive to avoid problems. To disable this warning, explicitly set vox_selinux::mode to permissive or disabled.')
@@ -93,45 +72,5 @@ class vox_selinux::config (
       line  => "SELINUXTYPE=${type}",
       match => '^SELINUXTYPE=\w+',
     }
-  }
-
-  file {$module_build_root:
-    ensure => 'directory',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0755',
-  }
-
-  file {"${module_build_root}/bin":
-    ensure => 'directory',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0755',
-  }
-
-  # put helper in place:
-  file {"${module_build_root}/bin/selinux_build_module_simple.sh":
-    ensure => 'present',
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0755',
-    source => "puppet:///modules/${module_name}/selinux_build_module_simple.sh",
-  }
-
-  $module_build_dir = "${module_build_root}/modules"
-
-  file {$module_build_dir:
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    recurse => true,
-    purge   => true,
-    force   => true,
-  }
-
-  # needed by refpolicy builder and our simple builder
-  file {"${module_build_dir}/tmp":
-    ensure                  => 'directory',
-    selinux_ignore_defaults => true,
   }
 }

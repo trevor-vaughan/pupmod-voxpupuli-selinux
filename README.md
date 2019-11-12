@@ -1,10 +1,11 @@
 # SELinux module for Puppet
 
-[![Build Status](https://travis-ci.org/simp/pupmod-voxpupuli-selinux.png?branch=master)](https://travis-ci.org/simp/pupmod-voxpupuli-selinux)
-[![Puppet Forge](https://img.shields.io/puppetforge/v/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
-[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
-[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
-[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/simp/vox_selinux.svg)](https://forge.puppetlabs.com/simp/vox_selinux)
+[![Build Status](https://travis-ci.org/voxpupuli/puppet-selinux.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-selinux)
+[![Code Coverage](https://coveralls.io/repos/github/voxpupuli/puppet-selinux/badge.svg?branch=master)](https://coveralls.io/github/voxpupuli/puppet-selinux)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
+[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
+[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
+[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/puppet/selinux.svg)](https://forge.puppetlabs.com/puppet/selinux)
 
 #### Table of Contents
 
@@ -48,9 +49,10 @@ This class manages SELinux on RHEL based systems.
 
 ---
 
+
 ## Requirements
 
-* Puppet 4 or later
+* Puppet 5 or later
 
 ## Module Description
 
@@ -79,7 +81,7 @@ running system.
 
   You will need to update your manifests to use the new parameter names.
 
-* The vox_selinux::restorecond manifest to manage the restorecond service no longer exists
+* The selinux::restorecond manifest to manage the restorecond service no longer exists
 
 ## Known problems / limitations
 
@@ -90,25 +92,24 @@ running system.
   will downgrade to permissive mode instead to avoid transitioning directly from
   disabled to enforcing state after a reboot and potentially breaking the system.
   The user will receive a warning when this happens,
-* If you add filecontexts with `semanage fcontext` (what `vox_selinux::fcontext`
+* If you add filecontexts with `semanage fcontext` (what `selinux::fcontext`
   does) the order is important. If you add /my/folder before /my/folder/subfolder
   only /my/folder will match (limitation of SELinux). There is no such limitation
   to file-contexts defined in SELinux modules. (GH-121)
-* While SELinux is disabled the defined types `vox_selinux::boolean`,
-  `vox_selinux::fcontext`, `vox_selinux::port` will produce puppet agent runtime errors
+* While SELinux is disabled the defined types `selinux::boolean`,
+  `selinux::fcontext`, `selinux::port` will produce puppet agent runtime errors
   because the used tools fail.
 * If you try to remove a built-in permissive type, the operation will appear to succeed
   but will actually have no effect, making your puppet runs non-idempotent.
-* The `vox_selinux_port` provider may misbehave if the title does not correspond to
-  the format it expects. Users should use the `vox_selinux::port` define instead except
+* The `selinux_port` provider may misbehave if the title does not correspond to
+  the format it expects. Users should use the `selinux::port` define instead except
   when purging resources
 * Defining port ranges that overlap with existing ranges is currently not detected, and will
   cause semanage to error when the resource is applied.
 
 ## Usage
 
-Generated puppet strings documentation with examples is available from
-https://voxpupuli.org/puppet-selinux/
+Generated puppet strings documentation with examples is available in the [REFERENCE.md](./REFERENCE.md)
 
 It's also included in the docs/ folder as simple html pages.
 
@@ -117,7 +118,7 @@ It's also included in the docs/ folder as simple html pages.
 ### Basic usage
 
 ```puppet
-include vox_selinux
+include selinux
 ```
 
 This will include the module and allow you to use the provided defined types,
@@ -126,7 +127,7 @@ but will not modify existing SELinux settings on the system.
 ### More advanced usage
 
 ```puppet
-class { vox_selinux:
+class { selinux:
   mode => 'enforcing',
   type => 'targeted',
 }
@@ -140,7 +141,7 @@ to fully take effect. It will run in `permissive` mode until then.
 ### Deploy a custom module using the refpolicy framework
 
 ```puppet
-vox_selinux::module { 'resnet-puppet':
+selinux::module { 'resnet-puppet':
   ensure    => 'present',
   source_te => 'puppet:///modules/site_puppet/site-puppet.te',
   source_fc => 'puppet:///modules/site_puppet/site-puppet.fc',
@@ -152,7 +153,7 @@ vox_selinux::module { 'resnet-puppet':
 ### Using pre-compiled policy packages
 
 ```puppet
-vox_selinux::module { 'resnet-puppet':
+selinux::module { 'resnet-puppet':
   ensure    => 'present',
   source_pp => 'puppet:///modules/site_puppet/site-puppet.pp',
 }
@@ -165,7 +166,7 @@ to test that your packages load properly.
 ### Set a boolean value
 
 ```puppet
-vox_selinux::boolean { 'puppetagent_manage_all_files': }
+selinux::boolean { 'puppetagent_manage_all_files': }
 ```
 
 ## Defined Types
@@ -204,7 +205,7 @@ The most important facts:
 | Fact                                      | Fact (old)                | Mode: disabled | Mode: permissive                        | Mode:  enforcing                        |
 |-------------------------------------------|---------------------------|----------------|-----------------------------------------|-----------------------------------------|
 | `$facts['os']['selinux']['enabled']`      | `$::selinux`              | false          | true                                    | true                                    |
-| `$facts['os']['selinux'['config_mode']`   | `$::selinux_config_mode`  | undef          | Value of SELINUX in /etc/selinux/config | Value of SELINUX in /etc/selinux/config |
+| `$facts['os']['selinux']['config_mode']`   | `$::selinux_config_mode`  | undef          | Value of SELINUX in /etc/selinux/config | Value of SELINUX in /etc/selinux/config |
 | `$facts['os']['selinux']['current_mode']` | `$::selinux_current_mode` | undef          | Value of `getenforce` downcased         | Value of `getenforce` downcased         |
 
 ## Authors

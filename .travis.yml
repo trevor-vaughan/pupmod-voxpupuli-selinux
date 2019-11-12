@@ -27,33 +27,27 @@ before_install:
 jobs:
   include:
     - stage: check
-      rvm: 2.4.1
+      rvm: 2.4.4
       env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 5.0"
       script:
         - bundle exec rake metadata_lint
         - bundle exec puppet module build
 
     - stage: spec
-      rvm: 2.4.1
+      rvm: 2.4.4
       env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 5.0"
       script:
         - bundle exec rake spec
 
     - stage: spec
-      rvm: 2.4.4
+      rvm: 2.4.5
       env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 6.0"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.1.9
-      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 4.10.0"
       script:
         - bundle exec rake spec
 
     # This needs to be last since we have an acceptance test
     - stage: deploy
-      rvm: 2.4.1
+      rvm: 2.4.4
       script:
         - true
       before_deploy:
@@ -73,5 +67,5 @@ jobs:
             secure: "rpiX9RQV0K20xG8pPC5uTAgn4mfdYCBA3mqw0lfi9Gu9i10Hjdl4RlV7Ja1nDwanKK2RerFC/TwrjQTHIrwDztkqGuq0yKn9E+TmbYe+e70Pu4QMHS8qHkzyyVBM9woOeM4n68evZ0mYeG42FzggPuAKo6RgYPISz/69YnVVqE4klB+YKut5M9dEBzuhIMzXIjpBnrh3lWL/kZy7CdsK1M2CzhuSRARJnQ/i9Pay4srBUueFy6+1QSyHdwKvKKYMroGHNR3ZhKdlMzh1aNKk268ek0GHw8gvxtU1sfGYawNZDTRfRRIFRzrb58i6Am6mvAKyIS5Zu7O2Myduj27ZbYX90y1Ki4s6nC8LIy6IjOjQSQHlY1BS9dGzFpa+oeg52gpJctEo0cC282n55YNUHi04xdhikPXGzAn+r2wQK6kxc36F7B1hGS29CX2T1vJw4WQ6DXhcrII+SdskJZcgZQGIdbEENd3X2ZVgnfLKE5tzwkgoMYGhKSFjGby9IfAbq/jXN3HIoZPZjleVHw6+2SyDdQIWQzBQSIDSK2xyDxeipczJo3uOpLnoxREGgYyyagVhkloCGsovspnzS4Kyiqo+aJ8cwDS9hsKzcTiZdjfxoU5SrWg56Y6dn7JDE17mIESOkOhJHTVsATxXtvApEtLAFeUYuQx+HgLA2c6lGEA="
           on:
             tags: true
-            rvm: 2.4.1
+            rvm: 2.4.4
             condition: '($SKIP_FORGE_PUBLISH != true)'

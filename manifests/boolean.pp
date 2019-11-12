@@ -1,6 +1,4 @@
-# vox_selinux::boolean
-#
-# This class will set the state of an SELinux boolean.
+# Manage the state of an SELinux boolean.
 #
 # @example Enable `named_write_master_zones`  boolean
 #   vox_selinux::boolean{ 'named_write_master_zones':
@@ -20,7 +18,7 @@ define vox_selinux::boolean (
   Boolean $persistent = true,
 ) {
 
-  include ::vox_selinux
+  include vox_selinux
 
   Anchor['vox_selinux::module post']
   -> Vox_selinux::Boolean[$title]

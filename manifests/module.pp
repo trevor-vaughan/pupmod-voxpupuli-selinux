@@ -1,12 +1,12 @@
-# Defined type: vox_selinux::module
-#
 # This class will either install or uninstall a SELinux module from a running system.
 # This module allows an admin to keep .te files in text form in a repository, while
 # allowing the system to compile and manage SELinux modules.
 #
 # Concepts incorporated from:
 # http://stuckinadoloop.wordpress.com/2011/06/15/puppet-managed-deployment-of-selinux-modules/
-# 
+#
+# @summary Manage a SELinux module on a running system
+#
 # @example compile and load the apache module - does not require make or the policy
 #   devel package
 #   vox_selinux::module{ 'apache':
@@ -62,22 +62,25 @@ define vox_selinux::module(
   Enum['absent', 'present'] $ensure = 'present',
   Optional[Enum['simple', 'refpolicy']] $builder = undef,
 ) {
-  include ::vox_selinux
+  include vox_selinux
+  require vox_selinux::build
 
-  if $builder == 'refpolicy' {
-    require ::vox_selinux::refpolicy_package
+  $_builder = pick($builder, $vox_selinux::default_builder, 'none')
+
+  if $_builder == 'refpolicy' {
+    require vox_selinux::refpolicy_package
   }
 
   if ($builder == 'simple' and ($source_if != undef or $content_if != undef)) {
     fail("The simple builder does not support the 'source_if' parameter")
   }
 
-  $module_dir = $::vox_selinux::config::module_build_dir
+  $module_dir = $vox_selinux::build::module_build_dir
   $module_file = "${module_dir}/${title}"
 
-  $build_command = pick($builder, $::vox_selinux::default_builder, 'none') ? {
-      'simple'    => shellquote("${::vox_selinux::module_build_root}/bin/selinux_build_module_simple.sh", $title, $module_dir),
-      'refpolicy' => shellquote('make', '-f', $::vox_selinux::refpolicy_makefile, "${title}.pp"),
+  $build_command = $_builder ? {
+      'simple'    => shellquote($vox_selinux::build::module_build_simple, $title, $module_dir),
+      'refpolicy' => shellquote('make', '-f', $vox_selinux::refpolicy_makefile, "${title}.pp"),
       'none'      => undef
   }
 

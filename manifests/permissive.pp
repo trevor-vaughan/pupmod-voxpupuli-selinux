@@ -1,6 +1,4 @@
-# vox_selinux::permissive
-#
-# This define will set an SELinux type to permissive
+# Set SELinux type to permissive
 #
 # @param ensure Set to present to add or absent to remove a permissive mode of a type
 # @param seltype A particular selinux type to make permissive, like "oddjob_mkhomedir_t"
@@ -15,7 +13,7 @@ define vox_selinux::permissive (
   Enum['present', 'absent'] $ensure = 'present',
 ) {
 
-  include ::vox_selinux
+  include vox_selinux
   if $ensure == 'present' {
     Anchor['vox_selinux::module post']
     -> Vox_selinux::Permissive[$title]

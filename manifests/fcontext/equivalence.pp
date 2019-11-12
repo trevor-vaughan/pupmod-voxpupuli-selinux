@@ -1,6 +1,4 @@
-# vox_selinux::fcontext::equivalence
-#
-# This define can be used to manage SELinux fcontext equivalences
+# Manage SELinux fcontext equivalences
 #
 # @param path   the path to define and equivalence for. Default: Resource title
 # @param target the path that this resource will be equivalent to.
@@ -18,7 +16,7 @@ define vox_selinux::fcontext::equivalence(
   Enum['present', 'absent'] $ensure = 'present'
 ) {
 
-  include ::vox_selinux
+  include vox_selinux
 
   if $ensure == 'present' {
     Anchor['vox_selinux::module post']

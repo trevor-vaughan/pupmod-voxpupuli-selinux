@@ -1,15 +1,31 @@
 require 'spec_helper_acceptance'
 
-describe 'selinux class' do
+describe 'vox_selinux class' do
+  before(:all) do
+    hosts.each do |host|
+      host.execute('getenforce') do |result|
+        mode = result.stdout.strip
+        if mode != 'Permissive'
+          host.execute('sed -i "s/SELINUX=.*/SELINUX=permissive/" /etc/selinux/config')
+          if mode == 'Disabled'
+            host.reboot
+          else
+            host.execute('setenforce Permissive && test "$(getenforce)" = "Permissive"')
+          end
+        end
+      end
+    end
+  end
+
   let(:pp) do
     <<-EOS
-      class { 'selinux': mode => 'enforcing' }
+      class { 'vox_selinux': mode => 'enforcing' }
 
-      selinux::boolean { 'puppet_selinux_test_policy_bool': }
+      vox_selinux::boolean { 'puppet_selinux_test_policy_bool': }
 
-      selinux::permissive { 'puppet_selinux_test_policy_t': }
+      vox_selinux::permissive { 'puppet_selinux_test_policy_t': }
 
-      selinux::port { 'puppet_selinux_test_policy_port_t/tcp':
+      vox_selinux::port { 'puppet_selinux_test_policy_port_t/tcp':
         seltype => 'puppet_selinux_test_policy_port_t',
         port => 55555,
         protocol => 'tcp',
@@ -43,36 +59,36 @@ describe 'selinux class' do
         | EOF
       }
 
-      selinux::module { 'puppet_selinux_simple_policy':
+      vox_selinux::module { 'puppet_selinux_simple_policy':
         source_te => 'file:///tmp/selinux_simple_policy.te',
         builder   => 'simple',
         require   => File['/tmp/selinux_simple_policy.te']
       }
 
-      selinux::module { 'puppet_selinux_test_policy':
+      vox_selinux::module { 'puppet_selinux_test_policy':
         source_te   => 'file:///tmp/selinux_test_policy.te',
         builder     => 'refpolicy',
         require     => File['/tmp/selinux_test_policy.te']
       }
 
-      Class['selinux'] ->
+      Class['vox_selinux'] ->
 
       file { '/tmp/test_selinux_fcontext':
         content => 'TEST',
         seltype => 'puppet_selinux_test_policy_exec_t',
       }
 
-      selinux::fcontext {'/tmp/fcontexts_source(/.*)?':
+      vox_selinux::fcontext {'/tmp/fcontexts_source(/.*)?':
         seltype => 'puppet_selinux_test_policy_exec_t',
       }
 
-      selinux::fcontext::equivalence {'/tmp/fcontexts_equivalent':
+      vox_selinux::fcontext::equivalence {'/tmp/fcontexts_equivalent':
         target => '/tmp/fcontexts_source',
       }
 
       file {['/tmp/fcontexts_source', '/tmp/fcontexts_equivalent']:
         ensure => 'directory',
-        require => [Selinux::Fcontext['/tmp/fcontexts_source(/.*)?'], Selinux::Fcontext::Equivalence['/tmp/fcontexts_equivalent']],
+        require => [Vox_selinux::Fcontext['/tmp/fcontexts_source(/.*)?'], Vox_selinux::Fcontext::Equivalence['/tmp/fcontexts_equivalent']],
       }
 
       file {['/tmp/fcontexts_source/define_test', '/tmp/fcontexts_equivalent/define_test']:
