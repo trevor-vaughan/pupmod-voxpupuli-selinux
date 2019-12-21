@@ -1,12 +1,12 @@
 {
-  "name": "puppet-selinux",
-  "version": "3.0.1-rc0",
+  "name": "simp-vox_selinux",
+  "version": "3.1.0",
   "author": "Vox Pupuli",
-  "summary": "This class manages SELinux on RHEL based systems",
+  "summary": "This class manages SELinux - FORKED FROM puppet-selinux",
   "license": "Apache-2.0",
-  "source": "https://github.com/voxpupuli/puppet-selinux",
-  "project_page": "https://github.com/voxpupuli/puppet-selinux",
-  "issues_url": "https://github.com/voxpupuli/puppet-selinux/issues",
+  "source": "https://github.com/simp/pupmod-voxpupuli-selinux",
+  "project_page": "https://github.com/simp/pupmod-voxpupuli-selinux",
+  "issues_url": "https://simp-project.atlassian.net",
   "operatingsystem_support": [
     {
       "operatingsystem": "RedHat",
@@ -30,6 +30,12 @@
         "28",
         "29",
         "30"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "10"
       ]
     }
   ],

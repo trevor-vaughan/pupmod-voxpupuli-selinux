@@ -19,7 +19,7 @@
 
 ## Overview
 
-This class manages SELinux on RHEL based systems.
+This class manages SELinux.
 
 ---
 
@@ -48,7 +48,6 @@ This class manages SELinux on RHEL based systems.
 > `simp_vox_migration.sh` script.
 
 ---
-
 
 ## Requirements
 
@@ -96,9 +95,6 @@ running system.
   does) the order is important. If you add /my/folder before /my/folder/subfolder
   only /my/folder will match (limitation of SELinux). There is no such limitation
   to file-contexts defined in SELinux modules. (GH-121)
-* While SELinux is disabled the defined types `selinux::boolean`,
-  `selinux::fcontext`, `selinux::port` will produce puppet agent runtime errors
-  because the used tools fail.
 * If you try to remove a built-in permissive type, the operation will appear to succeed
   but will actually have no effect, making your puppet runs non-idempotent.
 * The `selinux_port` provider may misbehave if the title does not correspond to
@@ -106,6 +102,8 @@ running system.
   when purging resources
 * Defining port ranges that overlap with existing ranges is currently not detected, and will
   cause semanage to error when the resource is applied.
+* On Debian systems, the defined types fcontext, permissive, and port do not
+  work because of [PA-2985](https://tickets.puppetlabs.com/browse/PA-2985).
 
 ## Usage
 
@@ -185,15 +183,7 @@ selinux::boolean { 'puppetagent_manage_all_files': }
     * `semanage` requires `--noreload` while in disabled mode when
       adding or changing something
     * Only few `--list` operations work
-* run acceptance tests:
-
-```
-BEAKER_debug=yes BEAKER_set="centos-6-x64" PUPPET_INSTALL_TYPE="agent" bundle exec rake beaker &&
-BEAKER_debug=yes BEAKER_set="centos-7-x64" PUPPET_INSTALL_TYPE="agent" bundle exec rake beaker &&
-BEAKER_debug=yes BEAKER_set="fedora-25-x64" PUPPET_INSTALL_TYPE="agent" bundle exec rake beaker &&
-BEAKER_debug=yes BEAKER_set="fedora-26-x64" PUPPET_INSTALL_TYPE="agent" bundle exec rake beaker &&
-BEAKER_debug=yes BEAKER_set="fedora-27-x64" PUPPET_INSTALL_TYPE="agent" bundle exec rake beaker
-```
+* run acceptance tests: `./test-acceptance-with-vagrant`
 
 ### Facter facts
 

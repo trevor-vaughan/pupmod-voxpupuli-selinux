@@ -1,34 +1,26 @@
 require 'spec_helper_acceptance'
 
-describe 'vox_selinux class' do
+describe 'selinux class' do
   before(:all) do
-    hosts.each do |host|
-      host.execute('getenforce') do |result|
-        mode = result.stdout.strip
-        if mode != 'Permissive'
-          host.execute('sed -i "s/SELINUX=.*/SELINUX=permissive/" /etc/selinux/config')
-          if mode == 'Disabled'
-            host.reboot
-          else
-            host.execute('setenforce Permissive && test "$(getenforce)" = "Permissive"')
-          end
-        end
-      end
-    end
+    ensure_permissive_mode_on(hosts)
   end
 
   let(:pp) do
     <<-EOS
-      class { 'vox_selinux': mode => 'enforcing' }
+      $have_selinux_ruby_library = #{have_selinux_ruby_library(hosts) ? 'true' : 'false'}
+
+      class { 'selinux': mode => 'enforcing' }
 
       vox_selinux::boolean { 'puppet_selinux_test_policy_bool': }
 
-      vox_selinux::permissive { 'puppet_selinux_test_policy_t': }
+      if $have_selinux_ruby_library {
+        vox_selinux::permissive { 'puppet_selinux_test_policy_t': }
 
-      vox_selinux::port { 'puppet_selinux_test_policy_port_t/tcp':
-        seltype => 'puppet_selinux_test_policy_port_t',
-        port => 55555,
-        protocol => 'tcp',
+        vox_selinux::port { 'puppet_selinux_test_policy_port_t/tcp':
+          seltype => 'puppet_selinux_test_policy_port_t',
+          port => 55555,
+          protocol => 'tcp',
+        }
       }
 
       # just something simple I found via Google:
@@ -71,39 +63,40 @@ describe 'vox_selinux class' do
         require     => File['/tmp/selinux_test_policy.te']
       }
 
-      Class['vox_selinux'] ->
+      if $have_selinux_ruby_library {
+        Class['selinux'] ->
 
-      file { '/tmp/test_selinux_fcontext':
-        content => 'TEST',
-        seltype => 'puppet_selinux_test_policy_exec_t',
+        file { '/tmp/test_selinux_fcontext':
+          content => 'TEST',
+          seltype => 'puppet_selinux_test_policy_exec_t',
+        }
+
+        vox_selinux::fcontext {'/tmp/fcontexts_source(/.*)?':
+          seltype => 'puppet_selinux_test_policy_exec_t',
+        }
+
+        vox_selinux::fcontext::equivalence {'/tmp/fcontexts_equivalent':
+          target => '/tmp/fcontexts_source',
+        }
+
+        file {['/tmp/fcontexts_source', '/tmp/fcontexts_equivalent']:
+          ensure => 'directory',
+          require => [Vox_selinux::Fcontext['/tmp/fcontexts_source(/.*)?'], Vox_selinux::Fcontext::Equivalence['/tmp/fcontexts_equivalent']],
+        }
+
+        file {['/tmp/fcontexts_source/define_test', '/tmp/fcontexts_equivalent/define_test']:
+          ensure  => file,
+          notify  => Exec["/sbin/restorecon -FR /tmp/fcontexts_*"]
+        }
+        exec {'/sbin/restorecon -FR /tmp/fcontexts_*':
+        # this is needed because puppet creates files with the wrong context as
+        # it runs unconfined and only becomes idempotent after the second run.
+          refreshonly => true,
+        }
+
+        # test purging
+        resources {['selinux_fcontext', 'selinux_fcontext_equivalence']: purge => true }
       }
-
-      vox_selinux::fcontext {'/tmp/fcontexts_source(/.*)?':
-        seltype => 'puppet_selinux_test_policy_exec_t',
-      }
-
-      vox_selinux::fcontext::equivalence {'/tmp/fcontexts_equivalent':
-        target => '/tmp/fcontexts_source',
-      }
-
-      file {['/tmp/fcontexts_source', '/tmp/fcontexts_equivalent']:
-        ensure => 'directory',
-        require => [Vox_selinux::Fcontext['/tmp/fcontexts_source(/.*)?'], Vox_selinux::Fcontext::Equivalence['/tmp/fcontexts_equivalent']],
-      }
-
-      file {['/tmp/fcontexts_source/define_test', '/tmp/fcontexts_equivalent/define_test']:
-        ensure  => file,
-        notify  => Exec["/sbin/restorecon -FR /tmp/fcontexts_*"]
-      }
-      exec {'/sbin/restorecon -FR /tmp/fcontexts_*':
-      # this is needed because puppet creates files with the wrong context as
-      # it runs unconfined and only becomes idempotent after the second run.
-        refreshonly => true,
-      }
-
-      # test purging
-      resources {['selinux_fcontext', 'selinux_fcontext_equivalence']: purge => true }
-
     EOS
   end
 
@@ -112,7 +105,7 @@ describe 'vox_selinux class' do
 
   it_behaves_like 'a idempotent resource'
 
-  describe package('selinux-policy-targeted') do
+  describe package(policy_package_for(hosts)) do
     it { is_expected.to be_installed }
   end
 
@@ -133,39 +126,41 @@ describe 'vox_selinux class' do
     end
   end
 
-  context 'the test file should have the specified file context' do
-    describe file('/tmp/test_selinux_fcontext') do
-      its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+  if have_selinux_ruby_library(hosts)
+    context 'the test file should have the specified file context' do
+      describe file('/tmp/test_selinux_fcontext') do
+        its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+      end
     end
-  end
 
-  context 'the define test directory should have the specified file context' do
-    describe file('/tmp/fcontexts_source/define_test') do
-      its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+    context 'the define test directory should have the specified file context' do
+      describe file('/tmp/fcontexts_source/define_test') do
+        its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+      end
     end
-  end
 
-  context 'the define equivalence test directory should have the same file context' do
-    describe file('/tmp/fcontexts_equivalent/define_test') do
-      its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+    context 'the define equivalence test directory should have the same file context' do
+      describe file('/tmp/fcontexts_equivalent/define_test') do
+        its(:selinux_label) { is_expected.to match(%r{^.*:puppet_selinux_test_policy_exec_t:s0$}) }
+      end
     end
-  end
 
-  context 'test boolean is available and activated' do
-    describe command('getsebool puppet_selinux_test_policy_bool') do
-      its(:stdout) { is_expected.to match(%r{puppet_selinux_test_policy_bool --> on}) }
+    context 'test boolean is available and activated' do
+      describe command('getsebool puppet_selinux_test_policy_bool') do
+        its(:stdout) { is_expected.to match(%r{puppet_selinux_test_policy_bool --> on}) }
+      end
     end
-  end
 
-  context 'test domain is permissive' do
-    describe command('semanage permissive -l') do
-      its(:stdout) { is_expected.to match(%r{^puppet_selinux_test_policy_t$}) }
+    context 'test domain is permissive' do
+      describe command('semanage permissive -l') do
+        its(:stdout) { is_expected.to match(%r{^puppet_selinux_test_policy_t$}) }
+      end
     end
-  end
 
-  context 'port 55555 should have type puppet_selinux_test_policy_port_t' do
-    describe command('semanage port -l | grep puppet_selinux_test_policy_port_t') do
-      its(:stdout) { is_expected.to match(%r{puppet_selinux_test_policy_port_t.*55555$}) }
+    context 'port 55555 should have type puppet_selinux_test_policy_port_t' do
+      describe command('semanage port -l | grep puppet_selinux_test_policy_port_t') do
+        its(:stdout) { is_expected.to match(%r{puppet_selinux_test_policy_port_t.*55555$}) }
+      end
     end
   end
 end

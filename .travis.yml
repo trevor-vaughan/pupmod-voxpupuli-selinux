@@ -1,71 +1,47 @@
-# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
-# ------------------------------------------------------------------------------
-#  release    pup   ruby      eol
-# PE 2016.4   4.7   2.1.9  TBD (LTS)
-# PE 2016.5   4.8   2.1.9  2017-10-31
-# SIMP6.0.0   4.8   2.1.9  TBD
-# PE 2017.1   4.9   2.1.9  2017-10-31
-# PE 2017.2   4.10  2.1.9  TBD
 ---
+dist: xenial
 language: ruby
 cache: bundler
-sudo: false
-
-bundler_args: --without development system_tests --path .vendor
-
+before_install:
+  - gem update --system
+  - gem update bundler
+  - bundle --version
+script:
+  - 'bundle exec rake $CHECK'
+matrix:
+  fast_finish: true
+  include:
+  - rvm: 2.4.4
+    bundler_args: --without system_tests development release
+    env: PUPPET_VERSION="~> 5.0" CHECK=test
+  - rvm: 2.5.3
+    bundler_args: --without system_tests development release
+    env: PUPPET_VERSION="~> 6.0" CHECK=test_with_coveralls
+  - rvm: 2.5.3
+    bundler_args: --without system_tests development release
+    env: PUPPET_VERSION="~> 6.0" CHECK=rubocop
+  - rvm: 2.4.4
+    bundler_args: --without system_tests development release
+    env: PUPPET_VERSION="~> 5.0" CHECK=build DEPLOY_TO_FORGE=yes
+branches:
+  only:
+  - master
+  - /^v\d/
 notifications:
   email: false
-
-addons:
-  apt:
-    packages:
-      - rpm
-
-before_install:
-  - rm -f Gemfile.lock
-
-jobs:
-  include:
-    - stage: check
-      rvm: 2.4.4
-      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 5.0"
-      script:
-        - bundle exec rake metadata_lint
-        - bundle exec puppet module build
-
-    - stage: spec
-      rvm: 2.4.4
-      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 5.0"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.4.5
-      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 6.0"
-      script:
-        - bundle exec rake spec
-
-    # This needs to be last since we have an acceptance test
-    - stage: deploy
-      rvm: 2.4.4
-      script:
-        - true
-      before_deploy:
-        - "export PUPMOD_METADATA_VERSION=`ruby -r json -e \"puts JSON.parse(File.read('metadata.json')).fetch('version')\"`"
-        - '[[ $TRAVIS_TAG =~ ^simp-${PUPMOD_METADATA_VERSION}$|^${PUPMOD_METADATA_VERSION}$ ]]'
-      deploy:
-        - provider: releases
-          api_key:
-            secure: "zaXAJvMReNdmp7+t2liAlZ6wxCCTvj2AmhLnn/XMKAAVXmnbfeH57OjnQeO3XFCeMgjYYL+WGjosc3e0Zgifm1mMRNwnp/J2AzCXhaKnQZCPdiPnx2XpdEC0fIW4RBI3TTnKqL8qjlqOZgt/EHBBwdfIfSGhf/wh4+OBY2gDjqInTGGSLKl32J/mVml5Sy6ZM8J4Qa3qvr7hlnbVJpmSYBcoy0yv2bWlwCVPv8/VWaU0I7z5DY038FTOnd+E/5Z+3j2bvqJ0UhaMyD48uTe+FpdfRmzeOYmPzETcYiNil8zOw++mBzU8GPZaFdZnT69krMBeGd98tLLCvvoUw46uXH3TUg89JRSt5YHZ1M5rskQukn2PLWhFEss0sKAyt61wRjWDSfqjXmi6AUdsULyhgm6a1ImjsAl/SNPUm0rqmQBL5CYvQeEIV4OJOszpt+/hzhFA56+rpcQTsRYNvMlPcg6itQ19jk3f1XL0ld+xuuAmCMAFqM+FQKeyIwiMivGzVYcOwbZzOF/wDmrX6QUeEPq2BvK7pVy7N529nDN+lCGliGO0oWGkuRU2X58urlmtnwchyNLnpLHPNJkF6356G+M7rWFU62hYL84lmLrD0qAM13moB9TPO637h1GToU1bFQ5i/Pa1yc2hpzoYxbXmcKFYn20JLui06Uxae7jr5dg="
-          skip_cleanup: true
-          on:
-            tags: true
-            condition: '($SKIP_FORGE_PUBLISH != true)'
-        - provider: puppetforge
-          user: simp
-          password:
-            secure: "rpiX9RQV0K20xG8pPC5uTAgn4mfdYCBA3mqw0lfi9Gu9i10Hjdl4RlV7Ja1nDwanKK2RerFC/TwrjQTHIrwDztkqGuq0yKn9E+TmbYe+e70Pu4QMHS8qHkzyyVBM9woOeM4n68evZ0mYeG42FzggPuAKo6RgYPISz/69YnVVqE4klB+YKut5M9dEBzuhIMzXIjpBnrh3lWL/kZy7CdsK1M2CzhuSRARJnQ/i9Pay4srBUueFy6+1QSyHdwKvKKYMroGHNR3ZhKdlMzh1aNKk268ek0GHw8gvxtU1sfGYawNZDTRfRRIFRzrb58i6Am6mvAKyIS5Zu7O2Myduj27ZbYX90y1Ki4s6nC8LIy6IjOjQSQHlY1BS9dGzFpa+oeg52gpJctEo0cC282n55YNUHi04xdhikPXGzAn+r2wQK6kxc36F7B1hGS29CX2T1vJw4WQ6DXhcrII+SdskJZcgZQGIdbEENd3X2ZVgnfLKE5tzwkgoMYGhKSFjGby9IfAbq/jXN3HIoZPZjleVHw6+2SyDdQIWQzBQSIDSK2xyDxeipczJo3uOpLnoxREGgYyyagVhkloCGsovspnzS4Kyiqo+aJ8cwDS9hsKzcTiZdjfxoU5SrWg56Y6dn7JDE17mIESOkOhJHTVsATxXtvApEtLAFeUYuQx+HgLA2c6lGEA="
-          on:
-            tags: true
-            rvm: 2.4.4
-            condition: '($SKIP_FORGE_PUBLISH != true)'
+  irc:
+    on_success: always
+    on_failure: always
+    channels:
+      - "chat.freenode.org#voxpupuli-notifications"
+deploy:
+  provider: puppetforge
+  user: puppet
+  password:
+    secure: "r7NI3OHbyMs/w351LkmkTFFLriDDyWKvgyZt+XYPw7jbaWmqnV4+NSJMQSkXgTS+tq2jNPLOWY1UuPuFJKkyd1m7LteOb2yZ6HJs5BL7QJjJWC2vUjkY60kl2xHn81D6SEXOXoVseGWiimlTlWJM3pKljNgZOZlOMw96vgnd6/I="
+  on:
+    tags: true
+    # all_branches is required to use tags
+    all_branches: true
+    # Only publish the build marked with "DEPLOY_TO_FORGE"
+    condition: "$DEPLOY_TO_FORGE = yes"

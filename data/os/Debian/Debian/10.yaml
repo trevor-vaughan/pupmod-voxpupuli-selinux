@@ -1,0 +1,6 @@
+---
+vox_selinux::package_name:
+  - policycoreutils-python-utils
+  - selinux-basics
+  - selinux-policy-default
+vox_selinux::refpolicy_package_name: selinux-policy-dev
