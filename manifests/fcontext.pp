@@ -4,8 +4,8 @@
 #
 # @example Add a file-context for mysql log files at non standard location
 #   vox_selinux::fcontext{'set-mysql-log-context':
-#     seltype => "mysqld_log_t",
-#     pathspec => "/u01/log/mysql(/.*)?",
+#     seltype  => 'mysqld_log_t',
+#     pathspec => '/u01/log/mysql(/.*)?',
 #   }
 #
 # @example Add a file-context only for directory types
@@ -54,12 +54,15 @@ define vox_selinux::fcontext(
     fail('"filetype" must be one of: a,f,d,c,b,s,l,p - see "man semanage-fcontext"')
   }
 
-  # make sure the title is correct or the provider will misbehave
-  selinux_fcontext {"${pathspec}_${filetype}":
-    ensure    => $ensure,
-    pathspec  => $pathspec,
-    seltype   => $seltype,
-    file_type => $filetype,
-    seluser   => $seluser,
+  # Do nothing unless SELinux is enabled
+  if $facts['selinux'] {
+    # make sure the title is correct or the provider will misbehave
+    selinux_fcontext {"${pathspec}_${filetype}":
+      ensure    => $ensure,
+      pathspec  => $pathspec,
+      seltype   => $seltype,
+      file_type => $filetype,
+      seluser   => $seluser,
+    }
   }
 }

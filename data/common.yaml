@@ -12,3 +12,5 @@ lookup_options:
     merge: hash
   vox_selinux::exec_restorecon:
     merge: hash
+
+vox_selinux::refpolicy_package_name: selinux-policy-devel

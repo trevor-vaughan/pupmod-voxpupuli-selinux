@@ -1,0 +1,3 @@
+---
+vox_selinux::package_name: policycoreutils-python-utils
+vox_selinux::manage_auditd_package: false

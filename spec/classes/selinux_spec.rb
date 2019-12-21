@@ -15,7 +15,6 @@ describe 'vox_selinux' do
       it { is_expected.to contain_class('vox_selinux').without_permissive }
       it { is_expected.to contain_class('vox_selinux::package') }
       it { is_expected.to contain_class('vox_selinux::config') }
-      it { is_expected.to contain_class('vox_selinux::params') }
       it { is_expected.to contain_anchor('vox_selinux::start').that_comes_before('Class[vox_selinux::package]') }
       it { is_expected.to contain_anchor('vox_selinux::module pre').that_requires('Class[vox_selinux::config]') }
       it { is_expected.to contain_anchor('vox_selinux::module pre').that_comes_before('Anchor[vox_selinux::module post]') }

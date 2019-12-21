@@ -2,7 +2,7 @@
 #
 # @api private
 #
-class vox_selinux::params {
+class vox_vox_selinux::params {
   $module_build_root = "${facts['puppet_vardir']}/puppet-selinux"
 
   case $facts['os']['family'] {
