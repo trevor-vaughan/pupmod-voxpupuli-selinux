@@ -42,7 +42,8 @@
 #   }
 #
 # @param ensure present or absent
-# @param source_pp the source file (either a puppet URI or local file) of a pre-compiled SELinux policy package. Mutually excludsive with using source files.
+# @param source_pp the source file (either a puppet URI or local file) of a pre-compiled SELinux policy package.
+#   Mutually excludsive with using source files.
 # @param source_te the source file (either a puppet URI or local file) of the SELinux .te file
 # @param source_fc the source file (either a puppet URI or local file) of the SELinux .fc file
 # @param source_if the source file (either a puppet URI or local file) of the SELinux .if file
@@ -51,7 +52,7 @@
 # @param content_if content of the SELinux .if file
 # @param builder either 'simple' or 'refpolicy'. The simple builder attempts to use checkmodule
 #   to build the module, whereas 'refpolicy' uses the refpolicy framework, but requires 'make'
-define vox_selinux::module(
+define vox_selinux::module (
   Optional[String] $source_pp = undef,
   Optional[String] $source_te = undef,
   Optional[String] $source_fc = undef,
@@ -79,9 +80,9 @@ define vox_selinux::module(
   $module_file = "${module_dir}/${title}"
 
   $build_command = $_builder ? {
-      'simple'    => shellquote($vox_selinux::build::module_build_simple, $title, $module_dir),
-      'refpolicy' => shellquote('make', '-f', $vox_selinux::refpolicy_makefile, "${title}.pp"),
-      'none'      => undef
+    'simple'    => shellquote($vox_selinux::build::module_build_simple, $title, $module_dir),
+    'refpolicy' => shellquote('make', '-f', $vox_selinux::refpolicy_makefile, "${title}.pp"),
+    'none'      => undef
   }
 
   Anchor['vox_selinux::module pre']
@@ -98,7 +99,7 @@ define vox_selinux::module(
   }
 
   if $has_source and $ensure == 'present' {
-    file {"${module_file}.te":
+    file { "${module_file}.te":
       ensure  => 'file',
       source  => $source_te,
       content => $content_te,
@@ -106,7 +107,7 @@ define vox_selinux::module(
     }
 
     $content_fc_real = $content_fc ? { undef => $source_fc ? { undef => '', default => undef }, default => $content_fc }
-    file {"${module_file}.fc":
+    file { "${module_file}.fc":
       ensure  => 'file',
       source  => $source_fc,
       content => $content_fc_real,
@@ -114,14 +115,14 @@ define vox_selinux::module(
     }
 
     $content_if_real = $content_if ? { undef => $source_if ? { undef => '', default => undef }, default => $content_if }
-    file {"${module_file}.if":
+    file { "${module_file}.if":
       ensure  => 'file',
       source  => $source_if,
       content => $content_if_real,
       notify  => Exec["clean-module-${title}"],
     }
     # ensure it doesn't get purged if it exists
-    file {"${module_file}.pp": selinux_ignore_defaults => true }
+    file { "${module_file}.pp": selinux_ignore_defaults => true }
 
     exec { "clean-module-${title}":
       path        => '/bin:/usr/bin',
@@ -140,7 +141,7 @@ define vox_selinux::module(
     }
     $install = true
   } elsif $source_pp != undef and $ensure == 'present' {
-    file {"${module_file}.pp":
+    file { "${module_file}.pp":
       ensure => 'file',
       source => $source_pp,
       notify => Exec["clean-module-${title}"],

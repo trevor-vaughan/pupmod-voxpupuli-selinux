@@ -17,7 +17,6 @@ define vox_selinux::boolean (
   Variant[Boolean, Enum['on', 'off', 'present', 'absent']] $ensure = 'on',
   Boolean $persistent = true,
 ) {
-
   include vox_selinux
 
   Anchor['vox_selinux::module post']
@@ -37,7 +36,7 @@ define vox_selinux::boolean (
   }
 
   # Do nothing unless SELinux is enabled
-  if $facts['selinux'] {
+  if $facts['os']['selinux']['enabled'] {
     selboolean { $name:
       value      => $value,
       persistent => $persistent,

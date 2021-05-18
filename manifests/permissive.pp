@@ -12,7 +12,6 @@ define vox_selinux::permissive (
   String $seltype = $title,
   Enum['present', 'absent'] $ensure = 'present',
 ) {
-
   include vox_selinux
   if $ensure == 'present' {
     Anchor['vox_selinux::module post']
@@ -24,7 +23,7 @@ define vox_selinux::permissive (
     -> Anchor['vox_selinux::module pre']
   }
 
-  selinux_permissive {$seltype:
+  selinux_permissive { $seltype:
     ensure => $ensure,
   }
 }

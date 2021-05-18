@@ -10,12 +10,11 @@
 #     target => '/usr/share/wordpress',
 #   }
 #
-define vox_selinux::fcontext::equivalence(
+define vox_selinux::fcontext::equivalence (
   String $target,
   String $path = $title,
   Enum['present', 'absent'] $ensure = 'present'
 ) {
-
   include vox_selinux
 
   if $ensure == 'present' {
@@ -33,4 +32,3 @@ define vox_selinux::fcontext::equivalence(
     target => $target,
   }
 }
-

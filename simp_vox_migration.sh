@@ -1,3 +1,14 @@
+jq '.name="simp-vox_selinux" |
+    .summary="This class manages SELinux - FORKED FROM puppet-selinux" |
+    .source="https://github.com/simp/pupmod-voxpupuli-selinux" |
+    .project_page="https://github.com/simp/pupmod-voxpupuli-selinux" |
+    .issues_url="https://simp-project.atlassian.net"' \
+   metadata.json > metadata.json.tmp
+
+mv metadata.json.tmp metadata.json
+
+rm -rf .github
+
 find manifests -type f -exec sed -i 's/inherits ::selinux/inherits ::vox_selinux/g' {} \;
 find manifests -type f -exec sed -i 's/include ::selinux/include ::vox_selinux/g' {} \;
 find manifests -type f -exec sed -i 's/selinux::/vox_selinux::/g' {} \;

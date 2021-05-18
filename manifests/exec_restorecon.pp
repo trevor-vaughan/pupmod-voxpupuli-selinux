@@ -10,7 +10,7 @@
 # @param unless see the Exec resource
 # @param onlyif see the Exec resource
 #
-define vox_selinux::exec_restorecon(
+define vox_selinux::exec_restorecon (
   Stdlib::Absolutepath $path        = $title,
   Boolean              $refreshonly = true,
   Boolean              $recurse     = true,
@@ -18,7 +18,6 @@ define vox_selinux::exec_restorecon(
   Optional[String]     $unless      = undef,
   Optional[String]     $onlyif      = undef,
 ) {
-
   include vox_selinux
 
   $opt_recurse = $recurse ? {
@@ -33,7 +32,7 @@ define vox_selinux::exec_restorecon(
 
   $command = "restorecon${opt_force}${opt_recurse}"
 
-  exec {"vox_selinux::exec_restorecon ${path}":
+  exec { "vox_selinux::exec_restorecon ${path}":
     path        => '/sbin:/usr/sbin',
     command     => sprintf('%s %s', $command, shellquote($path)),
     refreshonly => $refreshonly,
