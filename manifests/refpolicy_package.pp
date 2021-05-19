@@ -8,7 +8,7 @@
 class vox_selinux::refpolicy_package (
   $manage_package = $vox_selinux::manage_package,
   $package_name   = $vox_selinux::refpolicy_package_name,
-) inherits ::vox_selinux {
+) inherits selinux {
   assert_private()
   if $manage_package {
     ensure_packages ($package_name)

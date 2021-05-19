@@ -31,19 +31,18 @@
 #       - s = socket
 #       - l = symbolic link
 #       - p = named pipe
-define vox_selinux::fcontext(
+define vox_selinux::fcontext (
   String $pathspec                  = $title,
   Enum['absent', 'present'] $ensure = 'present',
   Optional[String] $seltype         = undef,
   Optional[String] $seluser         = undef,
   Optional[String] $filetype        = 'a',
 ) {
-
   include vox_selinux
   if $ensure == 'present' {
-  Anchor['vox_selinux::module post']
-  -> Vox_selinux::Fcontext[$title]
-  -> Anchor['vox_selinux::end']
+    Anchor['vox_selinux::module post']
+    -> Vox_selinux::Fcontext[$title]
+    -> Anchor['vox_selinux::end']
   } else {
     Anchor['vox_selinux::start']
     -> Vox_selinux::Fcontext[$title]
@@ -55,9 +54,9 @@ define vox_selinux::fcontext(
   }
 
   # Do nothing unless SELinux is enabled
-  if $facts['selinux'] {
+  if $facts['os']['selinux']['enabled'] {
     # make sure the title is correct or the provider will misbehave
-    selinux_fcontext {"${pathspec}_${filetype}":
+    selinux_fcontext { "${pathspec}_${filetype}":
       ensure    => $ensure,
       pathspec  => $pathspec,
       seltype   => $seltype,
