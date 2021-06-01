@@ -17,7 +17,9 @@
 1. [Development - Guide for contributing to the module](#development)
 1. [Authors](#authors)
 
----
+## Overview
+
+This class manages SELinux.
 
 > This module has been forked from
 > (voxpupuli/selinux)[https://github.com/voxpupuli/puppet-selinux] so that it
@@ -42,12 +44,6 @@
 >
 > You can see specifically how things were updated by reading the
 > `simp_vox_migration.sh` script.
-
----
-
-## Overview
-
-This class manages SELinux.
 
 ## Requirements
 
